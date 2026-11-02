@@ -1,0 +1,6 @@
+{
+  "name": "Full Tank",
+  "description": "A car fuel mileage calculator using the full-tank method with fill logs, statistics, and trend charts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

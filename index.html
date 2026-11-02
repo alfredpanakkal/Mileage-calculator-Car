@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Full Tank</title>
+  <meta name="description" content="A car fuel mileage calculator using the full-tank method with fill logs, statistics, and trend charts.">
+  <meta property="og:title" content="Full Tank">
+  <meta property="og:description" content="A car fuel mileage calculator using the full-tank method with fill logs, statistics, and trend charts.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #efe8dc;
+      --surface: #fbf7f0;
+      --ink: #1c1914;
+      --muted: #6e665c;
+      --line: #ddd2c3;
+      --petrol: #0e6b52;
+      --petrol-deep: #0a4d3b;
+      --mint: #e5f4ee;
+      --copper: #9a4518;
+      --copper-soft: #f8eadf;
+      --sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+      --display: "Fraunces", Georgia, "Times New Roman", serif;
+    }
+    * { box-sizing: border-box; }
+    html { color-scheme: light; background: var(--bg); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, select, input { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: default; opacity: 0.55; }
+    h1, h2, h3 { text-wrap: balance; margin: 0; }
+    p { text-wrap: pretty; margin: 0; }
+    .wrap {
+      width: min(40rem, 100%);
+      margin-inline: auto;
+      padding: 1rem 0.85rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    @media (min-width: 640px) {
+      .wrap { padding: 1.5rem 1rem 3rem; gap: 1.5rem; }
+    }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; }
+    .mark {
+      width: 2.5rem; height: 2.5rem; border-radius: 0.75rem;
+      background: var(--petrol); color: var(--surface);
+      display: grid; place-items: center; flex: none;
+    }
+    .mark svg { width: 1.2rem; height: 1.2rem; }
+    h1 { font-family: var(--display); font-size: 1.35rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+    @media (min-width: 640px) {
+      .mark { width: 2.75rem; height: 2.75rem; }
+      .mark svg { width: 1.25rem; height: 1.25rem; }
+      h1 { font-size: 1.5rem; }
+    }
+    .sub { margin-top: 0.15rem; color: var(--muted); font-size: 0.8125rem; }
+    .currency { display: flex; flex-direction: column; align-items: flex-end; gap: 0.2rem; color: var(--muted); font-size: 0.75rem; }
+    select, input {
+      height: 2.65rem; width: 100%; border-radius: 0.75rem;
+      border: 1px solid var(--line); background: var(--bg);
+      padding: 0 0.75rem; outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    @media (min-width: 640px) {
+      select, input { height: 3rem; }
+    }
+    select { width: auto; background: var(--surface); height: 2.35rem; font-size: 0.8125rem; padding: 0 0.5rem; }
+    @media (min-width: 640px) { select { height: 2.6rem; padding: 0 0.75rem; } }
+    input:focus, select:focus { border-color: var(--petrol); box-shadow: 0 0 0 3px color-mix(in srgb, var(--petrol) 30%, transparent); }
+
+    /* Nav Tabs for low scrolling on mobile */
+    .nav-tabs {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 0.85rem;
+      padding: 0.25rem;
+      gap: 0.25rem;
+    }
+    .tab-btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      height: 2.35rem;
+      border: 0;
+      border-radius: 0.625rem;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      padding: 0 0.4rem;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .tab-btn svg { flex: none; }
+    .tab-btn:hover { color: var(--ink); background: color-mix(in srgb, var(--petrol) 8%, transparent); }
+    .tab-btn.active {
+      background: var(--petrol);
+      color: var(--surface);
+      box-shadow: 0 1px 3px rgba(10, 77, 59, 0.25);
+    }
+    .tab-btn.active .badge {
+      background: rgba(255, 255, 255, 0.25);
+      color: #fff;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.6875rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 1rem;
+      background: color-mix(in srgb, var(--muted) 20%, transparent);
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .hero-kicker { color: var(--muted); font-size: 0.8125rem; font-weight: 500; }
+    .figure {
+      font-family: var(--display); font-weight: 600; letter-spacing: -0.03em;
+      font-size: 2.85rem; line-height: 1; color: var(--petrol); font-variant-numeric: tabular-nums;
+      margin-top: 0.25rem;
+    }
+    .figure span { margin-left: 0.35rem; font-family: var(--sans); font-size: 1rem; font-weight: 500; color: var(--muted); }
+    .formula { margin-top: 0.5rem; font-variant-numeric: tabular-nums; font-size: 0.9375rem; }
+    .meta { margin-top: 0.25rem; color: var(--muted); font-size: 0.8125rem; font-variant-numeric: tabular-nums; }
+    .money { margin-top: 0.35rem; color: var(--copper); font-size: 0.8125rem; font-variant-numeric: tabular-nums; }
+    .money .dot { color: var(--muted); padding: 0 0.3rem; }
+    .warn { margin-top: 0.6rem; background: var(--copper-soft); color: var(--copper); border-radius: 0.75rem; padding: 0.5rem 0.75rem; font-size: 0.8125rem; }
+    
+    .steps { display: grid; gap: 0.75rem; margin-top: 0.75rem; padding: 0; list-style: none; }
+    @media (min-width: 640px) {
+      .steps { grid-template-columns: repeat(3, 1fr); }
+      .figure { font-size: 4.25rem; }
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+      .span-2 { grid-column: span 2; }
+      .stats { grid-template-columns: repeat(4, 1fr); }
+    }
+    .step, .card, .stat, .row {
+      background: var(--surface); border: 1px solid var(--line); border-radius: 1rem;
+    }
+    .step { padding: 0.85rem 1rem; }
+    .step b { display: block; margin-top: 0.4rem; font-size: 0.875rem; font-weight: 500; }
+    .step p { margin-top: 0.2rem; color: var(--muted); font-size: 0.8125rem; }
+    .num { font-family: var(--display); color: var(--petrol); font-size: 1.125rem; font-weight: 600; }
+    
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 1rem; overflow: hidden; }
+    .stat { border: 0; border-radius: 0; padding: 0.65rem 0.85rem; }
+    .stat .k { color: var(--muted); font-size: 0.75rem; }
+    .stat .v { margin-top: 0.2rem; font-size: 0.875rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+    .stat .h { color: var(--copper); font-size: 0.75rem; font-variant-numeric: tabular-nums; margin-top: 0.15rem; }
+    
+    .spread { color: var(--muted); font-size: 0.8125rem; margin-top: -0.25rem; }
+    .card { padding: 1rem 1.15rem; }
+    .card h2 { font-family: var(--display); font-size: 1.25rem; font-weight: 600; }
+    .hint { margin-top: 0.25rem; color: var(--muted); font-size: 0.8125rem; }
+    form .grid-2 { display: grid; gap: 0.75rem; margin-top: 1rem; }
+    @media (min-width: 640px) { form .grid-2 { gap: 1rem; margin-top: 1.25rem; } }
+    label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.8125rem; font-weight: 500; }
+    .note { margin-top: 0.65rem; color: var(--muted); font-size: 0.8125rem; }
+    .error { margin-top: 0.65rem; color: var(--copper); font-size: 0.8125rem; }
+    
+    .primary, .ghost, .danger, .tool-btn {
+      height: 2.75rem; border-radius: 0.75rem; border: 0; padding: 0 0.9rem; font-weight: 500;
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    @media (min-width: 640px) {
+      .primary, .ghost, .danger { height: 3rem; }
+    }
+    .primary { width: 100%; margin-top: 0.85rem; background: var(--petrol); color: var(--surface); }
+    .primary:hover { background: var(--petrol-deep); }
+    .ghost { background: var(--surface); border: 1px solid var(--line); }
+    .ghost:hover { background: var(--mint); }
+    .texty { background: transparent; color: var(--muted); border: 0; height: 2.5rem; padding: 0 0.5rem; }
+    .texty:hover { color: var(--copper); }
+    
+    .tool-btn {
+      height: 2.25rem;
+      border-radius: 0.625rem;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      font-size: 0.8125rem;
+      padding: 0 0.65rem;
+    }
+    .tool-btn:hover {
+      background: var(--mint);
+      border-color: var(--petrol);
+      color: var(--petrol);
+    }
+    
+    .row-head, .log-head, .form-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
+    .log { display: flex; flex-direction: column; gap: 0.75rem; }
+    
+    /* Toolbar for History (Import / Export / Clear) */
+    .history-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 0.85rem;
+      padding: 0.6rem 0.75rem;
+    }
+    .data-tools {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+    
+    /* Quick Action CTA card for Overview */
+    .cta-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      background: var(--mint);
+      border: 1px solid color-mix(in srgb, var(--petrol) 30%, transparent);
+      border-radius: 1rem;
+      padding: 0.85rem 1rem;
+    }
+    .cta-text b { display: block; font-size: 0.9375rem; color: var(--petrol-deep); }
+    .cta-text p { font-size: 0.8125rem; color: var(--muted); margin-top: 0.15rem; }
+    .cta-btn {
+      height: 2.35rem;
+      border-radius: 0.625rem;
+      border: 0;
+      background: var(--petrol);
+      color: #fff;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      padding: 0 0.85rem;
+      white-space: nowrap;
+      flex: none;
+    }
+    .cta-btn:hover { background: var(--petrol-deep); }
+
+    .empty {
+      border: 1px dashed var(--line); border-radius: 1rem; padding: 1.75rem 1rem;
+      text-align: center; color: var(--muted); font-size: 0.875rem;
+    }
+    .km { font-family: var(--display); font-size: 1.65rem; font-weight: 600; line-height: 1; color: var(--petrol); font-variant-numeric: tabular-nums; }
+    .km span, .odo span { font-family: var(--sans); font-size: 0.8125rem; font-weight: 500; color: var(--muted); margin-left: 0.3rem; }
+    .odo { font-family: var(--display); font-size: 1.35rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .row p { margin-top: 0.25rem; font-size: 0.8125rem; }
+    .dashed { border-style: dashed; }
+    .icon-btn {
+      width: 2.4rem; height: 2.4rem; border: 0; border-radius: 0.625rem; background: transparent; color: var(--muted);
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .icon-btn:hover { background: var(--bg); color: var(--ink); }
+    .icon-btn.del:hover { background: var(--copper-soft); color: var(--copper); }
+    .actions { display: flex; gap: 0.15rem; }
+    .confirm { display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; }
+    .confirm p { max-width: 12rem; text-align: right; color: var(--copper); font-size: 0.75rem; }
+    .confirm .row-btns { display: flex; gap: 0.35rem; }
+    .danger { background: var(--copper); color: var(--surface); height: 2.35rem; padding: 0 0.75rem; font-size: 0.8125rem; }
+    
+    .chart { padding: 0.85rem 0.5rem 0.5rem; }
+    .chart-top { display: flex; justify-content: space-between; align-items: baseline; padding: 0 0.4rem 0.25rem; }
+    .chart-top h2 { font-family: var(--sans); font-size: 0.875rem; font-weight: 500; }
+    .chart svg { width: 100%; height: 11rem; display: block; }
+    @media (min-width: 640px) { .chart svg { height: 13rem; } }
+    footer { text-align: center; color: var(--muted); font-size: 0.75rem; margin-top: 0.5rem; }
+    
+    /* Toast feedback banner */
+    .toast {
+      position: fixed;
+      bottom: 1.25rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--ink);
+      color: var(--surface);
+      padding: 0.55rem 1.1rem;
+      border-radius: 2rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.22);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      white-space: nowrap;
+      max-width: 90vw;
+    }
+    .toast.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    
+    /* Import confirmation modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(28, 25, 20, 0.5);
+      backdrop-filter: blur(4px);
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+      z-index: 999;
+    }
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 1.25rem;
+      padding: 1.25rem;
+      max-width: 24rem;
+      width: 100%;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.18);
+    }
+    .modal-card h3 {
+      font-family: var(--display);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin: 0 0 0.4rem;
+    }
+    .modal-card p {
+      color: var(--muted);
+      font-size: 0.8125rem;
+      line-height: 1.4;
+      margin-bottom: 1.15rem;
+    }
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div class="brand">
+        <div class="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 22h18"/><path d="M4 9a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v13H4Z"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Full Tank</h1>
+          <p class="sub">Mileage between two full tanks</p>
+        </div>
+      </div>
+      <label class="currency">Currency
+        <select id="currency" aria-label="Currency">
+          <option value="INR">₹ INR</option>
+          <option value="USD">$ USD</option>
+          <option value="EUR">€ EUR</option>
+          <option value="GBP">£ GBP</option>
+        </select>
+      </label>
+    </header>
+
+    <!-- Navigation tabs to keep mobile ultra-compact without excessive scrolling -->
+    <nav class="nav-tabs" role="tablist" aria-label="Views">
+      <button type="button" class="tab-btn active" role="tab" id="tab-overview" aria-selected="true" data-tab="overview">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+        <span>Overview</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" id="tab-form" aria-selected="false" data-tab="form">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8m-4-4h8"/></svg>
+        <span id="tab-form-label">+ Add Fill</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" id="tab-history" aria-selected="false" data-tab="history">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+        <span>History</span>
+        <span class="badge" id="history-badge">0</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" id="tab-all" aria-selected="false" data-tab="all" title="View all on one page">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <span>All</span>
+      </button>
+    </nav>
+
+    <!-- View: Overview components -->
+    <div id="view-overview" style="display:contents">
+      <section id="hero"></section>
+      <section id="stats"></section>
+      <p id="spread" class="spread" hidden></p>
+      <div id="overview-cta" class="cta-card">
+        <div class="cta-text">
+          <b id="cta-title">Log your full tank</b>
+          <p id="cta-desc">Record your odometer reading</p>
+        </div>
+        <button type="button" class="cta-btn" id="cta-button">+ Add Fill</button>
+      </div>
+    </div>
+
+    <!-- View: Fill Form (compact on mobile, zero scroll needed) -->
+    <div id="view-form" style="display:contents">
+      <form id="form" class="card">
+        <div class="form-head">
+          <div>
+            <h2 id="form-title">First full tank</h2>
+            <p class="hint" id="form-hint"></p>
+          </div>
+          <button type="button" class="texty" id="cancel" hidden>Cancel</button>
+        </div>
+        <div class="grid-2">
+          <label>Date<input id="date" type="date" required></label>
+          <label>Odometer (km)<input id="odo" inputmode="decimal" autocomplete="off" placeholder="45785"></label>
+          <label>Litres filled<input id="liters" inputmode="decimal" autocomplete="off" placeholder="36.42"></label>
+          <label>Amount paid<input id="amount" inputmode="decimal" autocomplete="off" placeholder="3751"></label>
+          <label class="span-2">Note<input id="note" maxlength="80" autocomplete="off" placeholder="City, highway, station"></label>
+        </div>
+        <p class="note" id="form-note"></p>
+        <p class="error" id="error" role="alert" hidden></p>
+        <button class="primary" id="submit" type="submit">Save starting tank</button>
+      </form>
+    </div>
+
+    <!-- View: History components (Chart, Import/Export toolbar, Fills list) -->
+    <div id="view-history" style="display:contents">
+      <section id="chart" class="card chart" hidden></section>
+
+      <section class="log">
+        <div class="history-toolbar">
+          <div class="data-tools">
+            <button type="button" class="tool-btn" id="export-btn" title="Export history to JSON file">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              <span>Export</span>
+            </button>
+            <button type="button" class="tool-btn" id="import-btn" title="Import history from JSON file">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+              <span>Import</span>
+            </button>
+            <input type="file" id="import-file" accept=".json,application/json" style="display:none">
+          </div>
+          <div id="log-actions"></div>
+        </div>
+        <div id="list"></div>
+      </section>
+    </div>
+
+    <footer>
+      Saved in this browser. The first full tank is the starting line. Every fill after that is kilometres driven divided by litres added.
+    </footer>
+  </main>
+
+  <!-- Import Modal for Merge vs Replace -->
+  <div id="import-modal" class="modal-backdrop" hidden>
+    <div class="modal-card">
+      <h3>Import History</h3>
+      <p id="import-modal-text">File contains records. How would you like to import them?</p>
+      <div class="modal-actions">
+        <button type="button" class="primary" id="modal-replace-btn">Replace Current Log</button>
+        <button type="button" class="ghost" id="modal-merge-btn">Merge with Existing</button>
+        <button type="button" class="texty" id="modal-cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const KEY = "full-tank-html-v1";
+    const CURRENCIES = {
+      INR: "en-IN",
+      USD: "en-US",
+      EUR: "de-DE",
+      GBP: "en-GB",
+    };
+    const EXAMPLE = [
+      { id: "example-baseline", date: "2026-09-02", odometer: 45210, liters: 40, amount: 4120, note: "Baseline" },
+      { id: "example-city", date: "2026-09-16", odometer: 45785, liters: 36.42, amount: 3751, note: "Mostly city" },
+      { id: "example-highway", date: "2026-09-30", odometer: 46420, liters: 33.1, amount: 3410, note: "Highway" },
+      { id: "example-latest", date: "2026-10-12", odometer: 46955, liters: 35.8, amount: 3688, note: "" },
+    ];
+
+    let fills = [];
+    let currency = "INR";
+    let editingId = null;
+    let confirmDeleteId = null;
+    let confirmClear = false;
+    let currentTab = "overview"; // "overview" | "form" | "history" | "all"
+    let pendingImport = null;
+    let toastTimeout = null;
+
+    const $ = (id) => document.getElementById(id);
+
+    function todayISO() {
+      const d = new Date();
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+    function parseNumber(raw) {
+      const t = String(raw).trim().replace(/,/g, "");
+      if (!t || !/^(?:\d+\.?\d*|\.\d+)$/.test(t)) return null;
+      const n = Number(t);
+      return Number.isFinite(n) ? n : null;
+    }
+    function esc(s) {
+      const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+      return String(s).replace(/[&<>"']/g, (c) => map[c]);
+    }
+    function sortFills(list) {
+      return list.slice().sort((a, b) => a.odometer - b.odometer || a.date.localeCompare(b.date));
+    }
+    function formatKm(n) {
+      return n.toLocaleString("en-IN", { maximumFractionDigits: 1, minimumFractionDigits: Number.isInteger(n) ? 0 : 1 });
+    }
+    function formatFixed(n, d) {
+      return n.toLocaleString("en-IN", { minimumFractionDigits: d, maximumFractionDigits: d });
+    }
+    function money(n) {
+      return new Intl.NumberFormat(CURRENCIES[currency], { style: "currency", currency, maximumFractionDigits: 2 }).format(n);
+    }
+    function when(iso) {
+      const [y, m, d] = iso.split("-").map(Number);
+      return new Date(y, m - 1, d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+    }
+    function shortWhen(iso) {
+      const [y, m, d] = iso.split("-").map(Number);
+      return new Date(y, m - 1, d).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    }
+    function segmentsOf(list) {
+      const sorted = sortFills(list);
+      const out = [];
+      for (let i = 1; i < sorted.length; i++) {
+        const previous = sorted[i - 1];
+        const fill = sorted[i];
+        const distance = fill.odometer - previous.odometer;
+        const liters = fill.liters;
+        out.push({
+          fill, previous, distance, liters, amount: fill.amount,
+          kmPerLiter: liters > 0 ? distance / liters : NaN,
+          litersPer100: distance > 0 ? (liters / distance) * 100 : NaN,
+          costPerKm: distance > 0 ? fill.amount / distance : NaN,
+          costPerLiter: liters > 0 ? fill.amount / liters : NaN,
+        });
+      }
+      return out;
+    }
+    function summarize(list) {
+      const sorted = sortFills(list);
+      const segments = segmentsOf(sorted);
+      const distance = segments.reduce((s, x) => s + x.distance, 0);
+      const liters = segments.reduce((s, x) => s + x.liters, 0);
+      const amount = segments.reduce((s, x) => s + x.amount, 0);
+      let best = null, worst = null;
+      for (const seg of segments) {
+        if (!Number.isFinite(seg.kmPerLiter)) continue;
+        if (!best || seg.kmPerLiter > best.kmPerLiter) best = seg;
+        if (!worst || seg.kmPerLiter < worst.kmPerLiter) worst = seg;
+      }
+      return {
+        sorted, segments, distance, liters, amount,
+        kmPerLiter: liters > 0 ? distance / liters : null,
+        litersPer100: distance > 0 ? (liters / distance) * 100 : null,
+        costPerKm: distance > 0 ? amount / distance : null,
+        best, worst,
+      };
+    }
+    function unusual(km) {
+      return !Number.isFinite(km) || km < 4 || km > 35;
+    }
+    function fuelRequired(odometer) {
+      const others = fills.filter((f) => f.id !== editingId);
+      if (!others.length || !Number.isFinite(odometer)) return others.length > 0;
+      return odometer >= Math.min(...others.map((f) => f.odometer));
+    }
+    function save() {
+      localStorage.setItem(KEY, JSON.stringify({ fills, currency }));
+    }
+    function load() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (Array.isArray(data.fills)) {
+          fills = data.fills.filter((f) => f && typeof f.id === "string" && typeof f.odometer === "number");
+        }
+        if (CURRENCIES[data.currency]) currency = data.currency;
+      } catch (_) { /* keep empty */ }
+    }
+
+    function showToast(msg) {
+      const el = $("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        el.classList.remove("show");
+      }, 3200);
+    }
+
+    function setTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        const isMatch = btn.getAttribute("data-tab") === tab;
+        btn.classList.toggle("active", isMatch);
+        btn.setAttribute("aria-selected", isMatch ? "true" : "false");
+      });
+
+      const vOverview = $("view-overview");
+      const vForm = $("view-form");
+      const vHistory = $("view-history");
+
+      if (tab === "overview") {
+        vOverview.style.display = "contents";
+        vForm.style.display = "none";
+        vHistory.style.display = "none";
+      } else if (tab === "form") {
+        vOverview.style.display = "none";
+        vForm.style.display = "contents";
+        vHistory.style.display = "none";
+      } else if (tab === "history") {
+        vOverview.style.display = "none";
+        vForm.style.display = "none";
+        vHistory.style.display = "contents";
+      } else {
+        // "all"
+        vOverview.style.display = "contents";
+        vForm.style.display = "contents";
+        vHistory.style.display = "contents";
+      }
+      window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    }
+
+    function icons() {
+      return {
+        edit: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+        trash: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>',
+      };
+    }
+
+    function render() {
+      const summary = summarize(fills);
+      const latest = summary.segments.at(-1) || null;
+      const last = summary.sorted.at(-1) || null;
+      const needs = fuelRequired(parseNumber($("odo").value) ?? Infinity);
+      const hero = $("hero");
+
+      // Update badge in tab
+      $("history-badge").textContent = String(fills.length);
+
+      if (!latest) {
+        hero.innerHTML = `
+          <p>Mileage is the distance between two full tanks, divided by the litres it took to fill the second one.</p>
+          <ol class="steps">
+            <li class="step"><span class="num">1</span><b>Fill it completely</b><p>Note running odometer. That full tank is the starting line.</p></li>
+            <li class="step"><span class="num">2</span><b>Drive as usual</b><p>Partial top-ups throw the number off. Wait for next full fill.</p></li>
+            <li class="step"><span class="num">3</span><b>Fill to top again</b><p>Enter the new odometer, litres added, and amount paid.</p></li>
+          </ol>`;
+      } else {
+        const delta = summary.kmPerLiter == null ? 0 : Math.round((latest.kmPerLiter - summary.kmPerLiter) * 100) / 100;
+        hero.innerHTML = `
+          <p class="hero-kicker">Latest mileage · ${esc(when(latest.fill.date))}</p>
+          <p class="figure">${formatFixed(latest.kmPerLiter, 2)}<span>km/L</span></p>
+          <p class="formula">${formatKm(latest.distance)} km ÷ ${formatFixed(latest.liters, 2)} L</p>
+          <p class="meta">${formatKm(latest.previous.odometer)} km → ${formatKm(latest.fill.odometer)} km${latest.fill.note ? " · " + esc(latest.fill.note) : ""}</p>
+          <p class="money">${money(latest.amount)}<span class="dot">·</span>${money(latest.costPerKm)}/km<span class="dot">·</span>${money(latest.costPerLiter)}/L<span class="dot">·</span><span style="color:var(--muted)">${formatFixed(latest.litersPer100, 2)} L/100 km</span></p>
+          ${delta ? `<p class="meta">${delta > 0 ? "+" : "−"}${formatFixed(Math.abs(delta), 2)} km/L versus your average</p>` : ""}
+          ${unusual(latest.kmPerLiter) ? `<p class="warn">This mileage looks unusual. Check the odometer gap and receipt litres.</p>` : ""}`;
+      }
+
+      // Update Overview CTA Card
+      const ctaCard = $("overview-cta");
+      const ctaTitle = $("cta-title");
+      const ctaDesc = $("cta-desc");
+      const ctaButton = $("cta-button");
+      if (!fills.length) {
+        ctaTitle.textContent = "Start your log";
+        ctaDesc.textContent = "Fill tank to top & log starting odometer";
+        ctaButton.textContent = "+ Log First Tank";
+      } else {
+        ctaTitle.textContent = "Filled up again?";
+        ctaDesc.textContent = `Last reading: ${formatKm(last.odometer)} km (${when(last.date)})`;
+        ctaButton.textContent = "+ Log Next Fill";
+      }
+      ctaButton.onclick = () => {
+        resetForm();
+        setTab("form");
+      };
+
+      const stats = $("stats");
+      if (summary.segments.length && summary.kmPerLiter != null) {
+        stats.hidden = false;
+        stats.className = "stats";
+        stats.innerHTML = [
+          ["Average", formatFixed(summary.kmPerLiter, 2) + " km/L", ""],
+          ["Distance", formatKm(summary.distance) + " km", ""],
+          ["Fuel used", formatFixed(summary.liters, 2) + " L", ""],
+          ["Cost", summary.costPerKm != null ? money(summary.costPerKm) + "/km" : "—", money(summary.amount) + " measured"],
+        ].map(([k, v, h]) => `<div class="stat"><p class="k">${k}</p><p class="v">${v}</p>${h ? `<p class="h">${h}</p>` : ""}</div>`).join("");
+      } else {
+        stats.hidden = true;
+        stats.innerHTML = "";
+      }
+
+      const spread = $("spread");
+      if (summary.best && summary.worst && summary.segments.length > 1) {
+        spread.hidden = false;
+        spread.textContent = `Best ${formatFixed(summary.best.kmPerLiter, 2)} km/L  ·  Lowest ${formatFixed(summary.worst.kmPerLiter, 2)} km/L` +
+          (summary.litersPer100 != null ? `  ·  ${formatFixed(summary.litersPer100, 2)} L/100 km` : "");
+      } else spread.hidden = true;
+
+      drawChart(summary);
+
+      $("form-title").textContent = editingId ? "Edit this fill" : fills.length ? "Next full tank" : "First full tank";
+      $("tab-form-label").textContent = editingId ? "Edit Fill" : (fills.length ? "+ Add Fill" : "+ Start");
+      $("form-hint").textContent = editingId
+        ? "Saving recalculates every stretch that uses this reading."
+        : fills.length
+          ? `Last full tank: ${formatKm(last.odometer)} km on ${when(last.date)}.`
+          : "Note odometer when tank is full. Mileage begins at the next fill.";
+      $("cancel").hidden = !editingId;
+      $("form-note").textContent = needs
+        ? "Enter litres and amount paid on receipt. These litres were burned since the previous fill."
+        : "Litres and price on the first fill are for your records only and are not used in mileage math.";
+      $("liters").placeholder = needs ? "36.42" : "Optional on first fill";
+      $("amount").placeholder = needs ? "3751" : "Optional on first fill";
+      $("submit").textContent = editingId ? "Save fill" : fills.length ? "Calculate this fill" : "Save starting tank";
+      $("currency").value = currency;
+
+      // History Toolbar & Log actions
+      const actions = $("log-actions");
+      if (!fills.length) {
+        actions.innerHTML = `<button type="button" class="tool-btn" id="example">Try demo data</button>`;
+        $("example").onclick = () => {
+          fills = EXAMPLE.map((f) => ({ ...f }));
+          editingId = null;
+          confirmClear = false;
+          save();
+          resetForm();
+          render();
+          showToast("Loaded 4 demo fills");
+        };
+      } else if (confirmClear) {
+        actions.innerHTML = `<button type="button" class="danger" id="do-clear">Clear all</button><button type="button" class="texty" id="keep-log">Keep</button>`;
+        $("do-clear").onclick = () => {
+          fills = [];
+          confirmClear = false;
+          editingId = null;
+          save();
+          resetForm();
+          render();
+          showToast("Log cleared");
+        };
+        $("keep-log").onclick = () => { confirmClear = false; render(); };
+      } else {
+        actions.innerHTML = `<button type="button" class="texty" id="ask-clear">Clear log</button>`;
+        $("ask-clear").onclick = () => { confirmClear = true; render(); };
+      }
+
+      // Fill list
+      const list = $("list");
+      const newest = summary.sorted.slice().reverse();
+      if (!newest.length) {
+        list.innerHTML = `<p class="empty">No fills yet. Save a starting tank, drive, then log the next full tank.</p>`;
+        return;
+      }
+      const ic = icons();
+      list.innerHTML = newest.map((fill) => {
+        const seg = summary.segments.find((s) => s.fill.id === fill.id);
+        const confirming = confirmDeleteId === fill.id;
+        const middle = summary.sorted[0].id !== fill.id && summary.sorted.at(-1).id !== fill.id;
+        const only = summary.sorted.length === 1;
+        const detail = seg
+          ? (middle ? "Removing a middle fill makes the next mileage calculation unreliable." : "Remove this fill?")
+          : (only ? "Remove this starting tank?" : "Removing starting tank drops the first measured stretch.");
+        const tools = confirming
+          ? `<div class="confirm"><p>${esc(detail)}</p><div class="row-btns"><button type="button" class="danger" data-del="${esc(fill.id)}">Remove</button><button type="button" class="texty" data-keep>Keep</button></div></div>`
+          : `<div class="actions"><button type="button" class="icon-btn" aria-label="Edit fill" data-edit="${esc(fill.id)}" title="Edit">${ic.edit}</button><button type="button" class="icon-btn del" aria-label="Remove fill" data-ask="${esc(fill.id)}" title="Delete">${ic.trash}</button></div>`;
+        if (!seg) {
+          return `<article class="row dashed" style="padding:0.85rem 1rem">
+            <div class="row-head"><div><p style="font-weight:500;font-size:.8125rem">Starting full tank</p><p class="odo" style="margin-top:.2rem">${formatKm(fill.odometer)} km</p><p class="meta">${esc(when(fill.date))}</p></div>${tools}</div>
+            <p class="meta">${fill.liters > 0 ? formatFixed(fill.liters, 2) + " L" : "Litres not recorded"}${fill.amount > 0 ? " · " + money(fill.amount) : ""}${fill.note ? " · " + esc(fill.note) : ""}</p>
+            <p class="meta" style="color:var(--muted)">No mileage yet. Begins at next full tank.</p>
+          </article>`;
+        }
+        return `<article class="row" style="padding:0.85rem 1rem">
+          <div class="row-head"><div><p class="km">${formatFixed(seg.kmPerLiter, 2)}<span>km/L</span></p><p class="meta">${esc(when(fill.date))}</p></div>${tools}</div>
+          <p>${formatKm(seg.distance)} km ÷ ${formatFixed(seg.liters, 2)} L</p>
+          <p class="meta">${formatKm(seg.previous.odometer)} → ${formatKm(seg.fill.odometer)} km${fill.note ? " · " + esc(fill.note) : ""}</p>
+          <p class="money">${money(seg.amount)} · ${money(seg.costPerKm)}/km · ${money(seg.costPerLiter)}/L</p>
+          ${unusual(seg.kmPerLiter) ? `<p class="warn">Check this stretch — mileage looks unusual.</p>` : ""}
+        </article>`;
+      }).join("");
+
+      list.querySelectorAll("[data-edit]").forEach((btn) => btn.onclick = () => startEdit(btn.getAttribute("data-edit")));
+      list.querySelectorAll("[data-ask]").forEach((btn) => btn.onclick = () => { confirmDeleteId = btn.getAttribute("data-ask"); render(); });
+      list.querySelectorAll("[data-keep]").forEach((btn) => btn.onclick = () => { confirmDeleteId = null; render(); });
+      list.querySelectorAll("[data-del]").forEach((btn) => btn.onclick = () => {
+        const id = btn.getAttribute("data-del");
+        fills = fills.filter((f) => f.id !== id);
+        if (editingId === id) { editingId = null; resetForm(); }
+        confirmDeleteId = null;
+        save();
+        render();
+        showToast("Fill removed");
+      });
+    }
+
+    function drawChart(summary) {
+      const box = $("chart");
+      const points = summary.segments.filter((s) => Number.isFinite(s.kmPerLiter));
+      if (points.length < 2) { box.hidden = true; box.innerHTML = ""; return; }
+      const vals = points.map((p) => p.kmPerLiter);
+      const min = Math.min(...vals), max = Math.max(...vals);
+      const pad = Math.max(0.4, (max - min) * 0.35);
+      const y0 = min - pad, y1 = max + pad;
+      const w = 640, h = 208, left = 36, right = 12, top = 16, bottom = 28;
+      const iw = w - left - right, ih = h - top - bottom;
+      const x = (i) => left + (points.length === 1 ? iw / 2 : (iw * i) / (points.length - 1));
+      const y = (v) => top + ((y1 - v) / (y1 - y0)) * ih;
+      const line = points.map((p, i) => `${x(i).toFixed(1)},${y(p.kmPerLiter).toFixed(1)}`).join(" ");
+      const avg = summary.kmPerLiter;
+      const ticks = 4;
+      let grid = "";
+      for (let i = 0; i <= ticks; i++) {
+        const v = y0 + ((y1 - y0) * i) / ticks;
+        const yy = y(v);
+        grid += `<line x1="${left}" y1="${yy.toFixed(1)}" x2="${w - right}" y2="${yy.toFixed(1)}" stroke="#ddd2c3"/>`;
+        grid += `<text x="${left - 6}" y="${(yy + 4).toFixed(1)}" text-anchor="end" fill="#6e665c" font-size="12">${v.toFixed(0)}</text>`;
+      }
+      const labels = points.map((p, i) => `<text x="${x(i).toFixed(1)}" y="${h - 8}" text-anchor="middle" fill="#6e665c" font-size="12">${esc(shortWhen(p.fill.date))}</text>`).join("");
+      const dots = points.map((p, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(p.kmPerLiter).toFixed(1)}" r="4.5" fill="#0e6b52"><title>${formatFixed(p.kmPerLiter, 2)} km/L</title></circle>`).join("");
+      const avgLine = avg == null ? "" : `<line x1="${left}" y1="${y(avg).toFixed(1)}" x2="${w - right}" y2="${y(avg).toFixed(1)}" stroke="#9a4518" stroke-dasharray="4 4" stroke-width="1.5"/>`;
+      box.hidden = false;
+      box.innerHTML = `<div class="chart-top"><h2>Mileage by fill</h2><p class="meta">Dashed line is average</p></div>
+        <svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Mileage by fill">${grid}${avgLine}<polyline fill="none" stroke="#0e6b52" stroke-width="2.5" points="${line}"/>${dots}${labels}</svg>`;
+    }
+
+    function resetForm() {
+      editingId = null;
+      $("date").value = todayISO();
+      $("odo").value = "";
+      $("liters").value = "";
+      $("amount").value = "";
+      $("note").value = "";
+      showError("");
+    }
+    function showError(msg) {
+      const el = $("error");
+      el.hidden = !msg;
+      el.textContent = msg || "";
+    }
+    function startEdit(id) {
+      const fill = fills.find((f) => f.id === id);
+      if (!fill) return;
+      editingId = id;
+      confirmDeleteId = null;
+      $("date").value = fill.date;
+      $("odo").value = String(fill.odometer);
+      $("liters").value = fill.liters ? String(fill.liters) : "";
+      $("amount").value = fill.amount ? String(fill.amount) : "";
+      $("note").value = fill.note || "";
+      showError("");
+      render();
+      setTab("form");
+      $("form").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    }
+
+    /* Export History to JSON */
+    function exportHistory() {
+      if (!fills.length) {
+        showToast("No fills in history to export yet.");
+        return;
+      }
+      const data = {
+        app: "Full Tank",
+        version: "full-tank-html-v1",
+        exportedAt: new Date().toISOString(),
+        currency: currency,
+        fills: sortFills(fills),
+      };
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const d = todayISO();
+      a.href = url;
+      a.download = `full-tank-history-${d}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Exported ${fills.length} fill${fills.length === 1 ? "" : "s"} to JSON`);
+    }
+
+    /* Import History from JSON */
+    function triggerImport() {
+      const fileInput = $("import-file");
+      fileInput.value = "";
+      fileInput.click();
+    }
+
+    function handleImportFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          let incomingFills = [];
+          let incomingCurrency = null;
+
+          if (Array.isArray(parsed)) {
+            incomingFills = parsed;
+          } else if (parsed && typeof parsed === "object") {
+            if (Array.isArray(parsed.fills)) incomingFills = parsed.fills;
+            if (typeof parsed.currency === "string" && CURRENCIES[parsed.currency]) {
+              incomingCurrency = parsed.currency;
+            }
+          }
+
+          const valid = incomingFills
+            .filter((f) => f && typeof f === "object" && typeof f.odometer === "number" && !isNaN(f.odometer) && f.odometer > 0)
+            .map((f) => ({
+              id: typeof f.id === "string" && f.id ? f.id : (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random())),
+              date: typeof f.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(f.date) ? f.date : todayISO(),
+              odometer: Number(f.odometer),
+              liters: typeof f.liters === "number" && Number.isFinite(f.liters) && f.liters >= 0 ? f.liters : 0,
+              amount: typeof f.amount === "number" && Number.isFinite(f.amount) && f.amount >= 0 ? f.amount : 0,
+              note: typeof f.note === "string" ? f.note.slice(0, 80) : "",
+            }));
+
+          if (!valid.length) {
+            showToast("No valid fuel records found in this file.");
+            return;
+          }
+
+          if (fills.length > 0) {
+            pendingImport = { fills: valid, currency: incomingCurrency };
+            $("import-modal-text").textContent = `File contains ${valid.length} fill${valid.length === 1 ? "" : "s"}. You currently have ${fills.length} fill${fills.length === 1 ? "" : "s"} in your log.`;
+            $("import-modal").hidden = false;
+          } else {
+            applyImport(valid, incomingCurrency, "replace");
+          }
+        } catch (err) {
+          showToast("Could not read file: Invalid JSON format.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function applyImport(newFills, newCurrency, mode) {
+      if (mode === "replace") {
+        fills = sortFills(newFills);
+      } else {
+        const existingOdos = new Set(fills.map((f) => f.odometer));
+        const toAdd = newFills.filter((f) => !existingOdos.has(f.odometer));
+        fills = sortFills(fills.concat(toAdd));
+      }
+      if (newCurrency && CURRENCIES[newCurrency]) {
+        currency = newCurrency;
+      }
+      editingId = null;
+      confirmDeleteId = null;
+      confirmClear = false;
+      save();
+      resetForm();
+      render();
+      $("import-modal").hidden = true;
+      pendingImport = null;
+      showToast(`Imported ${newFills.length} record${newFills.length === 1 ? "" : "s"} successfully!`);
+    }
+
+    /* Event Listeners */
+    $("form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const date = $("date").value;
+      const odoRaw = $("odo").value;
+      const litersRaw = $("liters").value;
+      const amountRaw = $("amount").value;
+      if (odoRaw.trim() && parseNumber(odoRaw) == null) return showError("Enter the odometer as a number.");
+      if (litersRaw.trim() && parseNumber(litersRaw) == null) return showError("Enter litres as a number.");
+      if (amountRaw.trim() && parseNumber(amountRaw) == null) return showError("Enter the amount as a number.");
+      const odometer = parseNumber(odoRaw);
+      const liters = parseNumber(litersRaw);
+      const needs = fuelRequired(odometer ?? Infinity);
+      const amount = amountRaw.trim() === "" ? (needs ? null : 0) : parseNumber(amountRaw);
+      if (!date) return showError("Add the date of this fill.");
+      if (odometer == null || odometer <= 0) return showError("Enter the odometer reading in kilometres.");
+      if (odometer > 9999999) return showError("That odometer reading looks too large.");
+      const others = fills.filter((f) => f.id !== editingId);
+      if (others.some((f) => f.odometer === odometer)) return showError("Another fill is already logged at that odometer reading.");
+      if (!editingId) {
+        const last = sortFills(others).at(-1);
+        if (last && odometer <= last.odometer) return showError("Odometer must be higher than the last full tank. Edit that fill if the reading was wrong.");
+      }
+      if (needs) {
+        if (liters == null || liters <= 0) return showError("Enter the litres you added to fill the tank.");
+        if (liters > 400) return showError("That fuel amount looks too large. Check the litres.");
+        if (amount == null) return showError("Enter the total you paid for this fill. Use 0 if it was free.");
+      } else if (liters != null && liters > 400) return showError("That fuel amount looks too large. Check the litres.");
+      if (amount != null && amount < 0) return showError("Amount paid can’t be negative.");
+      const next = {
+        id: editingId || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
+        date, odometer, liters: liters ?? 0, amount: amount ?? 0, note: $("note").value.trim(),
+      };
+      fills = editingId ? fills.map((f) => f.id === editingId ? next : f) : fills.concat(next);
+      save();
+      resetForm();
+      render();
+      showToast(editingId ? "Fill updated" : "Full tank saved!");
+      setTab("overview");
+    });
+
+    $("cancel").onclick = () => {
+      resetForm();
+      render();
+      setTab("overview");
+    };
+    $("currency").onchange = () => { currency = $("currency").value; save(); render(); };
+    ["odo", "liters", "amount"].forEach((id) => $(id).addEventListener("input", () => { showError(""); render(); }));
+
+    // Tab buttons
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.onclick = () => setTab(btn.getAttribute("data-tab"));
+    });
+
+    // Export & Import buttons
+    $("export-btn").onclick = exportHistory;
+    $("import-btn").onclick = triggerImport;
+    $("import-file").onchange = (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleImportFile(e.target.files[0]);
+      }
+    };
+
+    // Modal buttons
+    $("modal-replace-btn").onclick = () => {
+      if (pendingImport) applyImport(pendingImport.fills, pendingImport.currency, "replace");
+    };
+    $("modal-merge-btn").onclick = () => {
+      if (pendingImport) applyImport(pendingImport.fills, pendingImport.currency, "merge");
+    };
+    $("modal-cancel-btn").onclick = () => {
+      $("import-modal").hidden = true;
+      pendingImport = null;
+    };
+
+    load();
+    $("date").value = todayISO();
+    $("currency").value = currency;
+    render();
+    setTab("overview");
+  </script>
+</body>
+</html>
